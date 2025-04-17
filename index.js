@@ -45,4 +45,12 @@ app.post('/api/chat', async (req, res) => {
     const reply = openaiRes.data.choices[0].message.content;
     console.log("Sending back reply:", reply);
     res.json({ reply });
-  } catch
+  } catch (err) {
+    console.error("OpenAI error:", err.response?.data || err.message);
+    res.status(500).json({ error: 'Failed to fetch AI response' });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`✅ AI proxy server running on port ${PORT}`);
+});
