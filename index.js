@@ -1,34 +1,27 @@
 import express from 'express';
-import cors from 'cors';
 import bodyParser from 'body-parser';
 import axios from 'axios';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const ALLOWED_ORIGIN = 'https://passionhealth.store';
 
-// Specific CORS configuration for your domain
-const allowedOrigin = 'https://passionhealth.store';
-
-app.use(cors({
-  origin: allowedOrigin,
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
-  credentials: false
-}));
-
-// Explicitly handle preflight OPTIONS requests
-app.options('*', cors({
-  origin: allowedOrigin,
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
-  credentials: false
-}));
+// Manual CORS middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
+  res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204); // No Content
+  }
+  next();
+});
 
 app.use(bodyParser.json());
 
 app.get('/api/test', (req, res) => {
-  res.json({ success: true, message: 'CORS is working!' });
+  res.json({ success: true, message: 'Manual CORS test route OK!' });
 });
 
 app.post('/api/chat', async (req, res) => {
@@ -48,7 +41,6 @@ app.post('/api/chat', async (req, res) => {
 
     const reply = openaiRes.data.choices[0].message.content;
     console.log("Sending back reply:", reply);
-    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
     res.json({ reply });
   } catch (err) {
     console.error("OpenAI error:", err.response?.data || err.message);
