@@ -7,7 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-// CORS setup for your specific domain
+// Specific CORS configuration for your domain
 const allowedOrigin = 'https://passionhealth.store';
 
 app.use(cors({
@@ -17,18 +17,20 @@ app.use(cors({
   credentials: false
 }));
 
-// Handle preflight requests
-app.options('*', cors());
+// Explicitly handle preflight OPTIONS requests
+app.options('*', cors({
+  origin: allowedOrigin,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+  credentials: false
+}));
 
-// JSON body parser
 app.use(bodyParser.json());
 
-// Test endpoint
 app.get('/api/test', (req, res) => {
   res.json({ success: true, message: 'CORS is working!' });
 });
 
-// AI chat proxy endpoint
 app.post('/api/chat', async (req, res) => {
   const userMessage = req.body.message;
   console.log("Received message:", userMessage);
@@ -46,6 +48,7 @@ app.post('/api/chat', async (req, res) => {
 
     const reply = openaiRes.data.choices[0].message.content;
     console.log("Sending back reply:", reply);
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
     res.json({ reply });
   } catch (err) {
     console.error("OpenAI error:", err.response?.data || err.message);
@@ -53,7 +56,6 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-// Start the server
 app.listen(PORT, () => {
   console.log(`✅ AI proxy server running on port ${PORT}`);
 });
