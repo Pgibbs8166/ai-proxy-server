@@ -7,21 +7,18 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-const allowedOrigins = ['https://passionhealth.store'];
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  }
-}));
+// TEMPORARY: Allow all origins for testing CORS
+app.use(cors({ origin: '*' }));
 
 app.use(bodyParser.json());
 
+app.get('/api/test', (req, res) => {
+  res.json({ success: true, message: 'CORS is working!' });
+});
+
 app.post('/api/chat', async (req, res) => {
   const userMessage = req.body.message;
+  console.log("Received message:", userMessage);
 
   try {
     const openaiRes = await axios.post('https://api.openai.com/v1/chat/completions', {
@@ -35,9 +32,10 @@ app.post('/api/chat', async (req, res) => {
     });
 
     const reply = openaiRes.data.choices[0].message.content;
+    console.log("Sending back reply:", reply);
     res.json({ reply });
   } catch (err) {
-    console.error(err.response?.data || err.message);
+    console.error("OpenAI error:", err.response?.data || err.message);
     res.status(500).json({ error: 'Failed to fetch AI response' });
   }
 });
