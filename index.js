@@ -1,3 +1,5 @@
+// Force update to redeploy on Render
+
 import express from 'express';
 import bodyParser from 'body-parser';
 import axios from 'axios';
@@ -7,26 +9,26 @@ const PORT = process.env.PORT || 3001;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const ALLOWED_ORIGIN = 'https://passionhealth.store';
 
-// ✅ Manual CORS headers applied to ALL routes
+// ✅ Manual CORS middleware
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
   res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') {
-    return res.sendStatus(204); // Respond to preflight
+    return res.sendStatus(204); // Preflight response
   }
   next();
 });
 
-// JSON body parser
+// ✅ JSON body support
 app.use(bodyParser.json());
 
-// ✅ Test route to verify deployment
+// ✅ Test route to confirm deployment
 app.get('/api/test', (req, res) => {
   res.json({ success: true, message: 'Manual CORS test route OK!' });
 });
 
-// ✅ Chat proxy route
+// ✅ Proxy route to OpenAI
 app.post('/api/chat', async (req, res) => {
   const userMessage = req.body.message;
   console.log("Received message:", userMessage);
@@ -51,6 +53,7 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
+// ✅ Start the server
 app.listen(PORT, () => {
   console.log(`✅ AI proxy server running on port ${PORT}`);
 });
