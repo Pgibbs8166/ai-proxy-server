@@ -20,7 +20,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// ✅ JSON body support
 app.use(bodyParser.json());
 
 // ✅ Test route to confirm deployment
@@ -53,7 +52,6 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-// ✅ Start the server
 app.listen(PORT, () => {
   console.log(`✅ AI proxy server running on port ${PORT}`);
 });
